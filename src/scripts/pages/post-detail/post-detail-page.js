@@ -35,10 +35,7 @@ export default class PostDetailPage {
       dbModel: Database,
     });
 
-    // this.#setupForm();
-
     this.#presenter.showPostDetail();
-    // this.#presenter.getCommentsList();
   }
 
   async populatePostDetailAndInitialMap(message, post) {
@@ -58,17 +55,24 @@ export default class PostDetailPage {
     // Map
     await this.#presenter.showPostDetailMap();
     if (this.#map) {
-      const postCoordinate = [post.lat, post.lon];
-      const markerOptions = { alt: post.description };
-      const popupOptions = { content: post.description };
+      const lat = post.location?.lat ?? post.lat;
+      const lon = post.location?.lon ?? post.lon;
 
-      this.#map.changeCamera(postCoordinate);
-      this.#map.addMarker(postCoordinate, markerOptions, popupOptions);
+      if (lat != null && lon != null) {
+        const postCoordinate = [lat, lon];
+        const markerOptions = { alt: post.description };
+        const popupOptions = { content: post.description };
+
+        this.#map.changeCamera(postCoordinate);
+        this.#map.addMarker(postCoordinate, markerOptions, popupOptions);
+      } else {
+        // no coords available — don't touch the map
+        console.info('populatePostDetailAndInitialMap: no coordinates for this post');
+      }
     }
 
     // Actions buttons
     this.#presenter.showSaveButton();
-    this.addNotifyMeEventListener();
   }
 
   populatePostDetailError(message) {
@@ -122,12 +126,6 @@ export default class PostDetailPage {
 
   removeFromBookmarkFailed(message) {
     alert(message);
-  }
-
-  addNotifyMeEventListener() {
-    document.getElementById('post-detail-notify-me').addEventListener('click', () => {
-      this.#presenter.notifyMe();
-    });
   }
 
   showPostDetailLoading() {

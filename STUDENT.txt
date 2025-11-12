@@ -1,3 +1,2 @@
-APP_URL=https://aurasa2439.github.io/umatter
-
+APP_URL=https://aurasa2439.github.io/umatter/#/login
 MAP_SERVICE_API_KEY=kqUWE7CM9sjjbacId3dI

@@ -3,10 +3,12 @@ import {
   generatePostItemTemplate,
   generatePostsListEmptyTemplate,
   generatePostsListErrorTemplate,
+  generateSavePostButtonTemplate,
 } from '../../templates';
 import HomePresenter from './home-presenter';
 import Map from '../../utils/map';
 import * as StorySharingAPI from '../../data/api';
+import Database from '../../data/database';
 
 export default class HomePage {
   #presenter = null;
@@ -50,6 +52,7 @@ export default class HomePage {
     this.#presenter = new HomePresenter({
       view: this,
       model: StorySharingAPI,
+      dbModel: Database,
     });
 
     await this.#presenter.initialGalleryAndMap();
@@ -90,6 +93,42 @@ export default class HomePage {
       <div class="posts-list" role="list">${html}</div>
     `;
     postsListContainer.setAttribute('aria-busy', 'false');
+    storyList.forEach(async (post) => {
+      const containerId = `save-actions-container-${post.id}`;
+      const container = document.getElementById(containerId);
+
+      if (!container) return;
+
+      const isSaved = await this.#presenter.isPostSaved(post.id);
+
+      if (isSaved) {
+        container.innerHTML = `
+          <button id="remove-${post.id}" class="post-detail-remove btn btn-transparent" aria-label="Buang postingan">
+            <i class="fas fa-heart" aria-hidden="true"></i>
+          </button>
+        `;
+
+        document
+          .getElementById(`remove-${post.id}`)
+          .addEventListener('click', async () => {
+            await this.#presenter.removePost(post.id);
+            await this.#presenter.showSaveButton(post.id);
+          });
+      } else {
+        container.innerHTML = `
+          <button id="save-${post.id}" class="btn btn-transparent" aria-label="Simpan postingan">
+            <i class="far fa-heart" aria-hidden="true"></i>
+          </button>
+        `;
+
+        document
+          .getElementById(`save-${post.id}`)
+          .addEventListener('click', async () => {
+            await this.#presenter.savePost(post.id);
+            await this.#presenter.showSaveButton(post.id);
+          });
+      }
+    });
   }
 
   populatePostsListEmpty() {
@@ -133,5 +172,44 @@ export default class HomePage {
     const postLoader = document.getElementById('posts-list-loading-container');
     postLoader.innerHTML = '';
     postLoader.parentElement.setAttribute('aria-busy', 'false');
+  }
+
+  renderSaveButton() {
+    document.getElementById('save-actions-container').innerHTML =
+      generateSavePostButtonTemplate();
+
+    const saveButton = document.getElementById('post-detail-save');
+    saveButton.addEventListener('click', async () => {
+      await this.#presenter.savePost();
+      await this.#presenter.showSaveButton();
+
+      saveButton.style.backgroundColor = "red";
+    });
+  }
+
+  saveToBookmarkSuccessfully(message) {
+    console.log(message);
+  }
+
+  saveToBookmarkFailed(message) {
+    alert(message);
+  }
+
+  renderRemoveButton() {
+    document.getElementById('save-actions-container').innerHTML =
+      generateRemovePostButtonTemplate();
+
+    document.getElementById('post-detail-remove').addEventListener('click', async () => {
+      await this.#presenter.removePost();
+      await this.#presenter.showSaveButton();
+    });
+  }
+
+  removeFromBookmarkSuccessfully(message) {
+    console.log(message);
+  }
+
+  removeFromBookmarkFailed(message) {
+    alert(message);
   }
 }

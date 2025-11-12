@@ -48,12 +48,24 @@
   }
 
   /* Post detail */
+  .post-detail {
+    width: 200px;
+    color: white !important;
+  }
+
   .post-detail__images {
-    height: 400px;
+    height: 200px;
   }
 
   .post-detail__body-container {
     inset-block-start: -150px;
+  }
+
+  .post-detail__body__map__container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px !important;
+    /* align-items: start; */
   }
 
   /* New documentations */
@@ -77,13 +89,17 @@
     grid-template-columns: repeat(2, minmax(300px, 1fr));
   }
 
-  /* Report detail */
+  /* Post detail */
   .post-detail__body-container {
     inset-block-start: -200px;
   }
 
   .post-detail__images {
-    height: 500px;
+    height: 250px;
+  }
+
+  .post-detail__map__title {
+    margin: 0;
   }
 
   /* New documentations */
@@ -139,7 +155,11 @@
     grid-template-columns: repeat(3, minmax(300px, 1fr));
   }
 
+  .post-detail {
+    width: 500px;
+  }
+
   .post-detail__images {
-    height: 600px;
+    height: 300px;
   }
 }

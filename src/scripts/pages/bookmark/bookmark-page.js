@@ -22,7 +22,7 @@ export default class BookmarkPage {
       </section>
 
       <section class="container">
-        <h1 class="section-title">Daftar Post Cerita Tersimpan</h1>
+        <h1 class="section-title">Daftar Post Cerita yang Disukai</h1>
 
         <div class="posts-list__container">
           <div id="posts-list"></div>
@@ -49,18 +49,27 @@ export default class BookmarkPage {
 
     const html = posts.reduce((accumulator, post) => {
       if (this.#map) {
-        const coordinate = [post.location.latitude, post.location.longitude];
-        const markerOptions = { alt: post.title };
-        const popupOptions = { content: post.title };
+        const lat = post.lat;
+        const lon = post.lon;
 
-        this.#map.addMarker(coordinate, markerOptions, popupOptions);
+        if (Number.isFinite(lat) && Number.isFinite(lon)) {
+          const coordinate = [lat, lon];
+          const markerOptions = { alt: post.title || post.name || post.posterName || '' };
+          const popupOptions = { content: post.title || post.description || '' };
+
+          this.#map.addMarker(coordinate, markerOptions, popupOptions);
+        } // else: skip adding marker for invalid coords
       }
+
+      // ensure template gets expected props
+      const posterName = post.name || post.posterName || 'Unknown';
+      const locationObj = post.location || { placeName: null, lat: post.lat, lon: post.lon };
 
       return accumulator.concat(
         generatePostItemTemplate({
           ...post,
-          placeNameLocation: post.location.placeName,
-          posterName: post.poster.name,
+          location: locationObj,
+          posterName,
         }),
       );
     }, '');

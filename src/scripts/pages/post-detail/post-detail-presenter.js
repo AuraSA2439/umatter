@@ -35,7 +35,7 @@ export default class PostDetailPresenter {
         return;
       }
 
-      const post = await postMapper(response.data);
+      const post = await postMapper(response.story);
       // console.log(post); // for debugging purpose, remove after checking it
 
       this.#view.populatePostDetailAndInitialMap(response.message, post);
@@ -47,23 +47,10 @@ export default class PostDetailPresenter {
     }
   }
 
-  async notifyMe() {
-    try {
-      const response = await this.#apiModel.sendReportToMeViaNotification(this.#id);
-      if (!response.ok) {
-        console.error('notifyMe: response:', response);
-        return;
-      }
-      console.log('notifyMe:', response.message);
-    } catch (error) {
-      console.error('notifyMe: error:', error);
-    }
-  }
-
   async savePost() {
     try {
       const post = await this.#apiModel.getPostById(this.#id);
-      await this.#dbModel.putPost(post.data);
+      await this.#dbModel.putPost(post.story);
 
       this.#view.saveToBookmarkSuccessfully('Success to save to bookmark');
     } catch (error) {

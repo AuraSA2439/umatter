@@ -53,20 +53,6 @@ export async function getLogin({ email, password }) {
   };
 }
 
-export async function getMyUserInfo() {
-  const accessToken = getAccessToken();
-
-  const fetchResponse = await fetch(ENDPOINTS.MY_USER_INFO, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-
-  const json = await fetchResponse.json();
-
-  return {
-    ...json,
-    ok: fetchResponse.ok,
-  };
-}
 
 // Story Functions
 export async function getAllPosts() {
@@ -108,13 +94,11 @@ export async function storeNewPost({
 
   const accessToken = getAccessToken();
   const formData = new FormData();
-  formData.set('description', description);
-  formData.set('latitude', lat);
-  formData.set('longitude', lon);
 
-  photo.forEach((photo) => {
-    formData.append('photo', photo);
-  });
+  formData.set('photo', photo);
+  formData.set('description', description);
+  formData.set('lat', lat);
+  formData.set('lon', lon);
 
   const fetchResponse = await fetch(ENDPOINTS.STORE_NEW_STORY, {
     method: 'POST',
@@ -132,8 +116,8 @@ export async function storeNewPost({
 
 export async function storeNewPostGuest({ description, photo, lat, lon }) {
   const formData = new FormData();
-  formData.append('description', description);
   formData.append('photo', photo);
+  formData.append('description', description);
   if (lat) formData.append('lat', lat);
   if (lon) formData.append('lon', lon);
 

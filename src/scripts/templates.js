@@ -16,7 +16,7 @@ export function generateLoaderAbsoluteTemplate() {
 export function generateMainNavigationListTemplate() {
   return `
     <li><a id="post-list-button" class="post-list-button" href="#/" aria-label="Daftar post">Daftar Post</a></li>
-    <li><a id="bookmark-button" class="bookmark-button" href="#/bookmark" aria-label="Bookmark post">Post Tersimpan</a></li>
+    <li><a id="bookmark-button" class="bookmark-button" href="#/bookmark" aria-label="Bookmark post">Post Disukai</a></li>
   `;
 }
 
@@ -71,24 +71,6 @@ export function generatePostDetailErrorTemplate(message) {
   `;
 }
 
-// export function generateCommentsListEmptyTemplate() {
-//   return `
-//     <section id="post-detail-comments-list-empty" class="post-detail__comments-list__empty" aria-live="polite">
-//       <h2>Tidak ada komentar yang tersedia</h2>
-//       <p>Saat ini, tidak ada komentar yang dapat ditampilkan.</p>
-//     </section>
-//   `;
-// }
-
-// export function generateCommentsListErrorTemplate(message) {
-//   return `
-//     <section id="post-detail-comments-list-error" class="post-detail__comments-list__error" role="alert">
-//       <h2>Terjadi kesalahan pengambilan data post</h2>
-//       <p>${message || 'Ganti jaringan atau laporkan error ini.'}</p>
-//     </section>
-//   `;
-// }
-
 export function generatePostItemTemplate({
   id,
   photoUrl,
@@ -102,6 +84,7 @@ export function generatePostItemTemplate({
   const placeName =
     location?.placeName ||
     (lat && lon ? `${lat}, ${lon}` : 'Lokasi tidak tersedia');
+
   return `
     <article tabindex="0" class="post-item" data-postid="${id}" aria-labelledby="post-${id}-title">
       <img class="post-item__image" src="${photoUrl}" alt="Foto dari ${posterName}">
@@ -109,9 +92,7 @@ export function generatePostItemTemplate({
         <header class="post-item__main">
           <div class="post-item__author">
             <h3 id="post-${id}-title">${posterName}</h3>
-            <button id="post-detail-save" class="btn btn-transparent" aria-label="Simpan postingan">
-              <i class="far fa-heart" aria-hidden="true"></i>
-            </button>
+            <div id="save-actions-container-${id}" class="save-actions-container"></div>
           </div>
         </header>
         <p class="post-item__description">${description}</p>
@@ -144,22 +125,6 @@ export function generatePostDetailImageTemplate(imageUrl = null, alt = '') {
   `;
 }
 
-// export function generatePostCommentItemTemplate({ photoCommenter, nameCommenter, body }) {
-//   return `
-//     <article tabindex="0" class="post-detail__comment-item" aria-label="Komentar oleh ${nameCommenter}">
-//       <img
-//         class="post-detail__comment-item__photo"
-//         src="${photoCommenter}"
-//         alt="Foto profil ${nameCommenter}"
-//       >
-//       <div class="post-detail__comment-item__body">
-//         <h3 class="post-detail__comment-item__body__author">${nameCommenter}</h3>
-//         <p class="post-detail__comment-item__body__text">${body}</p>
-//       </div>
-//     </article>
-//   `;
-// }
-
 export function generatePostDetailTemplate({
   description,
   photoUrl,
@@ -171,29 +136,11 @@ export function generatePostDetailTemplate({
 }) {
   const placeName = location?.placeName || (lat && lon ? `${lat}, ${lon}` : 'Lokasi tidak tersedia');
   const createdAtFormatted = showFormattedDate(createdAt, 'id-ID');
-  const imagesHtml = photoUrl.reduce(
-    (accumulator, photoUrl) =>
-      accumulator.concat(generatePostDetailImageTemplate(photoUrl, title)),
-    '',
-  );
+  const imagesHtml = generatePostDetailImageTemplate(photoUrl, `Foto dari ${posterName}`);
 
   return `
-    <div class="post-detail__header">
-      <h1 id="title" class="post-detail__title">${posterName}</h1>
-
-      <div class="post-detail__more-info">
-        <div class="post-detail__more-info__inline">
-          <div id="createdat" class="post-detail__createdat" data-value="${createdAtFormatted}"><i class="fas fa-calendar-alt"></i></div>
-          <div id="location-place-name" class="post-detail__location__place-name" data-value="${placeName}"><i class="fas fa-map"></i></div>
-        </div>
-        <div class="post-detail__more-info__inline">
-          <div id="location-latitude" class="post-detail__location__latitude" data-value="${lat}">Latitude:</div>
-          <div id="location-longitude" class="post-detail__location__longitude" data-value="${lon}">Longitude:</div>
-        </div>
-      </div>
-    </div>
-
     <div class="container">
+      <div id="save-actions-container" class="save-actions-container"></div>
       <div class="post-detail__images__container">
         <div id="images" class="post-detail__images">${imagesHtml}</div>
       </div>
@@ -201,8 +148,10 @@ export function generatePostDetailTemplate({
 
     <div class="container">
       <div class="post-detail__body">
+        <div class="post-detail__actions__buttons">
+        </div>
         <div class="post-detail__body__description__container">
-          <h2 class="post-detail__description__title">Informasi Lengkap</h2>
+          <h2 class="post-detail__description__title">${posterName}</h2>
           <div id="description" class="post-detail__description__body">
             ${description}
           </div>
@@ -213,20 +162,17 @@ export function generatePostDetailTemplate({
             <div id="map" class="post-detail__map"></div>
             <div id="map-loading-container"></div>
           </div>
+          <div id="location-place-name" class="post-detail__location__place-name" data-value="${placeName}"><i class="fas fa-map"></i></div>
+          <div class="post-detail__more-info__inline">
+            <div id="location-latitude" class="post-detail__location__latitude" data-value="${lat}">Latitude:</div>
+            <div id="location-longitude" class="post-detail__location__longitude" data-value="${lon}">Longitude:</div>
+          </div>
         </div>
   
         <hr>
   
         <div class="post-detail__body__actions__container">
-          <h2>Aksi</h2>
-          <div class="post-detail__actions__buttons">
-            <div id="save-actions-container"></div>
-            <div id="notify-me-actions-container">
-              <button id="post-detail-notify-me" class="btn btn-transparent">
-                Try Notify Me <i class="far fa-bell"></i>
-              </button>
-            </div>
-          </div>
+          <div id="createdat" class="post-detail__createdat" data-value="${createdAtFormatted}"><i class="fas fa-calendar-alt"></i></div>
         </div>
       </div>
     </div>
@@ -251,7 +197,7 @@ export function generateUnsubscribeButtonTemplate() {
 
 export function generateSavePostButtonTemplate() {
   return `
-    <button id="post-detail-save" class="btn btn-transparent" aria-label="Simpan postingan">
+    <button id="post-detail-save" class="post-detail-save btn btn-transparent" aria-label="Simpan postingan">
       <i class="far fa-heart" aria-hidden="true"></i>
     </button>
   `;
@@ -259,8 +205,8 @@ export function generateSavePostButtonTemplate() {
 
 export function generateRemovePostButtonTemplate() {
   return `
-    <button id="post-detail-remove" class="btn btn-transparent" aria-label="Buang postingan">
-      Buang postingan <i class="fas fa-bookmark" aria-hidden="true"></i>
+    <button id="post-detail-remove" class="post-detail-remove btn btn-transparent" aria-label="Buang postingan">
+      <i class="fas fa-heart" aria-hidden="true"></i>
     </button>
   `;
 }

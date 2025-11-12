@@ -35,28 +35,12 @@ export default class NewPresenter {
         return;
       }
 
-      // No need to wait response
-      this.#notifyToAllUser(response.data.id);
       this.#view.storeSuccessfully(response.message, response.data);
-
     } catch (error) {
-      console.error('postNewStory: error:', error);
+      console.error('postNewPost: error:', error);
       this.#view.storeFailed(error.message);
     } finally {
       this.#view.hideSubmitLoadingButton();
-    }
-  }
-  async #notifyToAllUser(reportId) {
-    try {
-      const response = await this.#model.sendReportToAllUserViaNotification(reportId);
-      if (!response.ok) {
-        console.error('#notifyToAllUser: response:', response);
-        return false;
-      }
-      return true;
-    } catch (error) {
-      console.error('#notifyToAllUser: error:', error);
-      return false;
     }
   }
 }
